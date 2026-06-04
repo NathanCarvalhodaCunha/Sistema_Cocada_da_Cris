@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão | Cocada da Cris</title>
+    <link rel="shortcut icon" href="Icone.png" type="image/x-icon">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <h2>Cocada da Cris</h2>
+                </div>
+                <button id="close-sidebar" class="close-sidebar-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <nav class="menu">
+                <button class="menu-btn active" data-target="dashboard"><i class="fa-solid fa-chart-pie"></i> Dashboard</button>
+                <button class="menu-btn" data-target="caixa"><i class="fa-solid fa-wallet"></i> Caixa</button>
+                <button class="menu-btn" data-target="estoque"><i class="fa-solid fa-boxes-stacked"></i> Estoque</button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="theme-toggle" class="btn-icon" title="Alternar Tema"><i class="fa-solid fa-moon"></i></button>
+                <button id="export-btn" class="btn-icon" title="Backup JSON"><i class="fa-solid fa-download"></i></button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div id="mobile-overlay" class="mobile-overlay"></div>
+
+            <header>
+                <div class="header-left">
+                    <button id="mobile-menu-btn" class="mobile-menu-btn"><i class="fa-solid fa-bars"></i></button>
+                    <h1 id="page-title">Dashboard Financeiro</h1>
+                </div>
+                <div class="user-info">
+                    <span id="current-date"></span>
+                </div>
+            </header>
+
+            <div id="toast-container"></div>
+
+            <section id="dashboard" class="tab-content active">
+                <div class="cards-grid">
+                    <div class="card summary-card">
+                        <div class="card-icon entrada"><i class="fa-solid fa-arrow-up"></i></div>
+                        <div class="card-info">
+                            <p>Entradas (Mês)</p>
+                            <h3 id="dash-entradas">R$ 0,00</h3>
+                        </div>
+                    </div>
+                    <div class="card summary-card">
+                        <div class="card-icon saida"><i class="fa-solid fa-arrow-down"></i></div>
+                        <div class="card-info">
+                            <p>Saídas (Mês)</p>
+                            <h3 id="dash-saidas">R$ 0,00</h3>
+                        </div>
+                    </div>
+                    <div class="card summary-card">
+                        <div class="card-icon saldo"><i class="fa-solid fa-sack-dollar"></i></div>
+                        <div class="card-info">
+                            <p>Saldo Atual</p>
+                            <h3 id="dash-saldo">R$ 0,00</h3>
+                        </div>
+                    </div>
+                    <div class="card summary-card">
+                        <div class="card-icon estoque"><i class="fa-solid fa-box"></i></div>
+                        <div class="card-info">
+                            <p>Valor em Estoque</p>
+                            <h3 id="dash-valor-estoque">R$ 0,00</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="charts-container">
+                    <div class="card chart-card">
+                        <h3>Fluxo de Caixa Mensal</h3>
+                        <div class="chart-wrapper">
+                            <canvas id="cashflowChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="caixa" class="tab-content">
+                <div class="card form-card">
+                    <h3>Nova Movimentação</h3>
+                    <form id="form-caixa">
+                        <div class="form-row">
+                            <input type="text" id="cx-desc" placeholder="Descrição" required>
+                            <input type="number" id="cx-valor" placeholder="Valor (R$)" step="0.01" required>
+                            <select id="cx-tipo" required>
+                                <option value="entrada">Entrada</option>
+                                <option value="saida">Saída</option>
+                            </select>
+                            <select id="cx-cat" required>
+                                <option value="venda">Venda</option>
+                                <option value="compra">Compra</option>
+                                <option value="despesa">Despesa Fixa</option>
+                                <option value="salario">Salário</option>
+                                <option value="outros">Outros</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary">Adicionar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card table-card">
+                    <div class="table-header">
+                        <h3>Histórico de Caixa</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="tabela-caixa">
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Descrição</th>
+                                    <th>Categoria</th>
+                                    <th>Tipo</th>
+                                    <th>Valor</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="estoque" class="tab-content">
+                <div class="card form-card">
+                    <h3>Novo Produto</h3>
+                    <form id="form-estoque">
+                        <div class="form-row">
+                            <input type="text" id="est-nome" placeholder="Nome do Produto" required>
+                            <input type="number" id="est-qtd" placeholder="Quantidade" required>
+                            <input type="number" id="est-custo" placeholder="Custo (R$)" step="0.01" required>
+                            <input type="number" id="est-venda" placeholder="Preço Venda (R$)" step="0.01" required>
+                            <button type="submit" class="btn btn-primary">Cadastrar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card table-card">
+                    <div class="table-header">
+                        <h3>Controle de Inventário</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="tabela-estoque">
+                            <thead>
+                                <tr>
+                                    <th>Produto</th>
+                                    <th>Qtd</th>
+                                    <th>Custo Un.</th>
+                                    <th>Venda Un.</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="modal-venda" class="modal">
+        <div class="modal-content card">
+            <span class="close-modal">&times;</span>
+            <h3>Registrar Venda: <span id="venda-produto-nome"></span></h3>
+            <form id="form-venda">
+                <input type="hidden" id="venda-produto-id">
+                <div class="form-group">
+                    <label>Quantidade a vender (Max: <span id="venda-estoque-max"></span>)</label>
+                    <input type="number" id="venda-qtd" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Valor Total (R$)</label>
+                    <input type="number" id="venda-total" step="0.01" readonly>
+                </div>
+                <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 10px;">Confirmar Venda</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
